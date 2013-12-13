@@ -24,6 +24,30 @@ public class ConverterOptions {
 		}
 	}
 	
+	private Format createFormat(String[] formatOptions) {
+		Format format = null;
+		String formatKey = formatOptions[0];
+		switch (formatKey) {
+		    case "B": 
+		    	format = new Format(Type.BOOLEAN, (formatOptions.length > 1) ? formatOptions[1] : null);
+		    	break;
+		    case "D": 
+		    	format = new Format(Type.DATE, (formatOptions.length > 1) ? formatOptions[1] : null);
+		    	break;
+		    case "H":
+		    	format = new Format(Type.HYPERLINK, (formatOptions.length > 1) ? formatOptions[1] : null);
+		    	break;
+		    case "N":
+		    	format = new Format(Type.NUMBER, (formatOptions.length > 1) ? formatOptions[1] : null);
+		    	break;
+		    case "T":
+		    	format = new Format(Type.TEXT, (formatOptions.length > 1) ? formatOptions[1] : null);
+		    	break;
+		    default:break;
+	    }
+		return format;
+	}
+	
 	private void parseFormats() {
 		String columnsParamsString = line.getOptionValue(COLUMNS_KEY);
 		String[] columnParams = columnsParamsString.split(COLUMNS_STRING_DELIMETER);
@@ -32,25 +56,7 @@ public class ConverterOptions {
 		for (int i = 0; i < columnParams.length; i++) {
 			currentFormat = columnParams[i];
 			String[] values = currentFormat.split(" ");
-			Format format = null;
-			switch (values[0]) {
-			    case "B": 
-			    	format = new Format(Type.BOOLEAN, (values.length > 1) ? values[1] : null);
-			    	break;
-			    case "D": 
-			    	format = new Format(Type.DATE, (values.length > 1) ? values[1] : null);
-			    	break;
-			    case "H":
-			    	format = new Format(Type.HYPERLINK, (values.length > 1) ? values[1] : null);
-			    	break;
-			    case "N":
-			    	format = new Format(Type.NUMBER, (values.length > 1) ? values[1] : null);
-			    	break;
-			    case "T":
-			    	format = new Format(Type.TEXT, (values.length > 1) ? values[1] : null);
-			    	break;
-			    default:break;
-			}
+			Format format = createFormat(values);
 			formats[i] = format;
 		}
 	}
