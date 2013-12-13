@@ -4,11 +4,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.util.Scanner;
 
 public class CsvToXlsConverter {
 	
 	private ConverterOptions options = null;
-
+    private Scanner scvScanner = null;
+    
 	public void convertToXls(String strSource, String strDestination)
 			throws FileNotFoundException, IOException, IllegalArgumentException {
 		File source = new File(strSource);
@@ -25,6 +27,24 @@ public class CsvToXlsConverter {
 			throw new IllegalArgumentException("The destination path"
 					+ "is not a directory");
 		}
+		File[] fileList = null;
+		if (source.isDirectory()) {
+			fileList = source.listFiles(new CSVFilenameFilter());
+		} else {
+			fileList = new File[] {source};
+		}
+		for (File file : fileList) {
+			openCSV();
+			convertToXls();
+		}
+		
+	}
+	
+	private void openCSV() {
+		
+	}
+	
+	private void convertToXls() {
 		
 	}
 	
