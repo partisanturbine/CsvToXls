@@ -1,6 +1,7 @@
 package com.digsolab;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -9,7 +10,7 @@ import java.util.Scanner;
 public class CsvToXlsConverter {
 	
 	private ConverterOptions options = null;
-    private Scanner scvScanner = null;
+    private Scanner csvScanner = null;
     
 	public void convertToXls(String strSource, String strDestination)
 			throws FileNotFoundException, IOException, IllegalArgumentException {
@@ -34,18 +35,33 @@ public class CsvToXlsConverter {
 			fileList = new File[] {source};
 		}
 		for (File file : fileList) {
-			openCSV();
+			openCSV(file);
 			convertToXls();
 		}
-		
 	}
 	
-	private void openCSV() {
-		
+	private void openCSV(File file) throws FileNotFoundException, IOException {
+		FileInputStream fin = null;
+		try {
+		    fin = new FileInputStream(file);
+		    csvScanner = new Scanner(fin);
+		}
+		finally {
+			if (fin != null) {
+			    fin.close();	
+			}
+		}
 	}
 	
 	private void convertToXls() {
-		
+		String input = null;
+		String[] csvCells = null;
+		SXSSFWorkbook wb = new SXSSFWorkbook(100);
+		while (csvScanner.hasNextLine()) {
+			input = csvScanner.nextLine();
+			csvCells = input.split(",");
+			
+		}
 	}
 	
 	private class CSVFilenameFilter implements FilenameFilter {
