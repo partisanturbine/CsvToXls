@@ -35,7 +35,14 @@ public class CsvToXlsConverter {
     private ICsvListReader listReader = null;
     private SXSSFWorkbook wb = null;
     
-	public void convertToXls(String strSource, String strDestination, ConverterOptions options)
+    public void convertToExcel(ConverterOptions options) throws FileNotFoundException,
+                                                IOException, IllegalArgumentException {
+    	String strSource = options.getSource();
+    	String strDestination = options.getDestination();
+    	convertToXls(strSource, strDestination);
+    }
+    
+	private void convertToXls(String strSource, String strDestination)
 			throws FileNotFoundException, IOException, IllegalArgumentException {
 		File source = new File(strSource);
 		File destination = new File(strDestination);
