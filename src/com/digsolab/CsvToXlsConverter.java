@@ -11,31 +11,29 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Scanner;
-
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Hyperlink;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
-import org.supercsv.cellprocessor.ParseBool;
-import org.supercsv.cellprocessor.ParseDate;
-import org.supercsv.cellprocessor.ParseDouble;
-import org.supercsv.cellprocessor.ift.CellProcessor;
 import org.supercsv.io.ICsvListReader;
 import org.supercsv.io.CsvListReader;
 import org.supercsv.prefs.CsvPreference;
 
 public class CsvToXlsConverter {
 	
-	private static final String EXCEL_EXTENSION = ".xls";
+	private static final String EXCEL_EXTENSION = ".xlsx";
 	private static final String DATE_JAVA_PATTERN = "yyyy-mm-dd hh:mm:ss";
 	private ConverterOptions options = null;
     private ICsvListReader listReader = null;
     private SXSSFWorkbook wb = null;
     
-    public void convertToExcel(ConverterOptions options) throws FileNotFoundException,
+    public CsvToXlsConverter(ConverterOptions options) {
+    	this.options = options;
+    }
+    
+    public void convertToExcel() throws FileNotFoundException,
                                                 IOException, IllegalArgumentException {
     	String strSource = options.getSource();
     	String strDestination = options.getDestination();
@@ -68,7 +66,7 @@ public class CsvToXlsConverter {
 			try {
 			    openCSV(file);
 			    convertToXls();
-			    saveXls(file);
+			    saveXls(destination, file);
 			}
 			catch (ParseException pex) {
 				//TODO: logging
@@ -94,12 +92,11 @@ public class CsvToXlsConverter {
 			listReader = new CsvListReader(new FileReader(file), CsvPreference.STANDARD_PREFERENCE);
 	}
 	
-	
 	private void convertToXls() throws ParseException,
     NullPointerException, NumberFormatException, IOException {
 		String input = null;
 		String[] csvCells = null;
-		wb = new SXSSFWorkbook(100);
+		wb = new SXSSFWorkbook(1000);
 		Sheet sh = wb.createSheet();
 		int rowIndex = 0;
 		List<String> fieldsList = null;
@@ -111,8 +108,8 @@ public class CsvToXlsConverter {
     private void convertToXlsRow(Sheet sh, int rowIndex, List<String> csvRow) throws ParseException,
     NullPointerException, NumberFormatException {
 		Row row = sh.createRow(rowIndex);
-		int cellTotal = csvRow.size();
-		for (int cellnum = 0; cellnum < cellTotal; cellnum++) {
+		int columnCount = this.options.getFormats().length;
+		for (int cellnum = 0; cellnum < columnCount; cellnum++) {
 			Cell cell = row.createCell(cellnum);
 			applyFormatting(cell, csvRow.get(cellnum), cellnum);
 		}
@@ -157,17 +154,20 @@ public class CsvToXlsConverter {
     	CellStyle cellStyle = wb.createCellStyle();
     	Format cellFormat = options.getFormats()[cellIndex];
     	String mask = cellFormat.getMask();
-    	cellStyle.setDataFormat(
-    	        wb.getCreationHelper().createDataFormat().getFormat(mask));
+    	if (mask != null) {
+    		cellStyle.setDataFormat(
+        	        wb.getCreationHelper().createDataFormat().getFormat(mask));
+    	}
+    	cell.setCellStyle(cellStyle);
     }
     
      
-    private void saveXls(File file) throws FileNotFoundException, IOException {
+    private void saveXls(File destination, File file) throws FileNotFoundException, IOException {
     	String sourceFileName = file.getName();
     	String destinationFileName = sourceFileName.substring(0, sourceFileName.lastIndexOf('.')) + EXCEL_EXTENSION;
     	FileOutputStream fout = null;
     	try {
-    	    fout = new FileOutputStream(destinationFileName);
+    	    fout = new FileOutputStream(new File(destination, destinationFileName));
     	    wb.write(fout);
     	}
     	finally {

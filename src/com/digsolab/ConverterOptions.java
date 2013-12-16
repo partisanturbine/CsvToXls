@@ -29,7 +29,7 @@ public class ConverterOptions {
 	private Options getOptions() {
 		Options options = new Options();
 		options.addOption(DELIMETER_KEY, true, "Csv delimeter");
-	    options.addOption(COLUMNS_KEY, true, "Columns formatting string");
+	    options.addOption(COLUMNS_KEY, true, "Columns pattern string");
 	    return options;
 	}
 	
@@ -59,8 +59,11 @@ public class ConverterOptions {
 		}
 	}
 	
-	private void parseFormats() {
+	private void parseFormats() throws IllegalArgumentException {
 		String columnsParamsString = line.getOptionValue(COLUMNS_KEY);
+		if (columnsParamsString == null) {
+			throw new IllegalArgumentException("You haven't provided the columns pattern string");
+		}
 		String[] columnParams = columnsParamsString.split(COLUMNS_STRING_DELIMETER);
 		formats = new Format[columnParams.length];
 		String currentFormat = null;
@@ -68,6 +71,9 @@ public class ConverterOptions {
 			currentFormat = columnParams[i];
 			String[] values = currentFormat.split(" ");
 			Format format = createFormat(values);
+			if (format == null) {
+				throw new IllegalArgumentException("The columns pattern string is invalid format");
+			}
 			formats[i] = format;
 		}
 	}

@@ -6,5 +6,9 @@
 	<classpathentry kind="lib" path="/Users/daniilmigacev/java_projects/jars/poi-3.9/poi-ooxml-3.9-20121203.jar"/>
 	<classpathentry kind="lib" path="/Users/daniilmigacev/java_projects/jars/commons-cli-1.2/commons-cli-1.2.jar"/>
 	<classpathentry kind="lib" path="/Users/daniilmigacev/java_projects/jars/super-csv/super-csv-2.1.0.jar"/>
+	<classpathentry kind="lib" path="/Users/daniilmigacev/java_projects/jars/ooxml-schemas-1.1.jar"/>
+	<classpathentry kind="lib" path="/Users/daniilmigacev/java_projects/jars/poi-3.9/ooxml-lib/stax-api-1.0.1.jar"/>
+	<classpathentry kind="lib" path="/Users/daniilmigacev/java_projects/jars/poi-3.9/ooxml-lib/xmlbeans-2.3.0.jar"/>
+	<classpathentry kind="lib" path="/Users/daniilmigacev/java_projects/jars/poi-3.9/ooxml-lib/dom4j-1.6.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
