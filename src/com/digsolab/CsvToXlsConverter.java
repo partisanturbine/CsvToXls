@@ -30,13 +30,12 @@ import org.supercsv.prefs.CsvPreference;
 public class CsvToXlsConverter {
 	
 	private static final String EXCEL_EXTENSION = ".xls";
-	private static final String DATE_PATTERN = "yyyy-mm-dd hh:mm:ss";
+	private static final String DATE_JAVA_PATTERN = "yyyy-mm-dd hh:mm:ss";
 	private ConverterOptions options = null;
     private ICsvListReader listReader = null;
     private SXSSFWorkbook wb = null;
-    private CellProcessor[] processors = null;
     
-	public void convertToXls(String strSource, String strDestination)
+	public void convertToXls(String strSource, String strDestination, ConverterOptions options)
 			throws FileNotFoundException, IOException, IllegalArgumentException {
 		File source = new File(strSource);
 		File destination = new File(strDestination);
@@ -128,7 +127,7 @@ public class CsvToXlsConverter {
     		 cell.setCellValue(boolValue);
     		 break;
     	case DATE:
-    		Date dateValue = (new SimpleDateFormat(DATE_PATTERN)).parse(data);
+    		Date dateValue = (new SimpleDateFormat(DATE_JAVA_PATTERN)).parse(data);
     		cell.setCellValue(dateValue);
     		break;
     	case HYPERLINK:
