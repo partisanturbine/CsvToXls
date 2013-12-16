@@ -6,33 +6,27 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Scanner;
-
-import javax.swing.text.DateFormatter;
-
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.Hyperlink;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 public class CsvToXlsConverter {
 	
 	private static final String EXCEL_EXTENSION = ".xls";
+	private static final String DATE_PATTERN = "";
 	private ConverterOptions options = null;
     private Scanner csvScanner = null;
     private SXSSFWorkbook wb = null;
     
 	public void convertToXls(String strSource, String strDestination)
-			throws FileNotFoundException, IOException, IllegalArgumentException, ParseException,
-            NullPointerException, NumberFormatException {
+			throws FileNotFoundException, IOException, IllegalArgumentException {
 		File source = new File(strSource);
 		File destination = new File(strDestination);
 		if (!source.exists()) {
@@ -53,23 +47,49 @@ public class CsvToXlsConverter {
 		} else {
 			fileList = new File[] {source};
 		}
-		for (File file : fileList) {
-			openCSV(file);
-			convertToXls();
-			saveXls(file);
+		for (File file : fileList) {	
+			try {
+			    openCSV(file);
+			    convertToXls();
+			    saveXls(file);
+			}
+			catch (ParseException pex) {
+				//TODO: logging
+			}
+			catch (NullPointerException nex) {
+				//TODO: logging
+			}
+			catch (NumberFormatException numEx) {
+				//TODO: logging
+			}
+			finally { 
+				if (wb != null) {
+				    wb.dispose();
+				}
+				if (csvScanner != null) {
+				    csvScanner.close();
+				}
+			}
 		}
 	}
 	
 	private void openCSV(File file) throws FileNotFoundException, IOException {
 		FileInputStream fin = null;
 		try {
-		    fin = new FileInputStream(file);
-		    csvScanner = new Scanner(fin);
+			fin = new FileInputStream(file);
+			csvScanner = new Scanner(fin);
 		}
-		finally {
+		catch (FileNotFoundException fEx) {
 			if (fin != null) {
-			    fin.close();	
+			    fin.close();
 			}
+			throw new FileNotFoundException();
+		}
+		catch (IOException ioEx) {
+			if (fin != null) {
+			    fin.close();
+			}
+			throw new IOException();
 		}
 	}
 	
@@ -86,7 +106,6 @@ public class CsvToXlsConverter {
 			csvCells = input.split(options.getDelimeter());
 			convertToXlsRow(sh, rowIndex++, csvCells);
 		}
-		csvScanner.close();
 	}
 	
     private void convertToXlsRow(Sheet sh, int rowIndex, String[] csvRow) throws ParseException,
@@ -145,7 +164,16 @@ public class CsvToXlsConverter {
     private void saveXls(File file) throws FileNotFoundException, IOException {
     	String sourceFileName = file.getName();
     	String destinationFileName = sourceFileName.substring(0, sourceFileName.lastIndexOf('.')) + EXCEL_EXTENSION;
-    	FileOutputStream fout = new FileOutputStream(destinationFileName);
+    	FileOutputStream fout = null;
+    	try {
+    	    fout = new FileOutputStream(destinationFileName);
+    	    wb.write(fout);
+    	}
+    	finally {
+    		if (fout != null) {
+    			fout.close();
+    		}
+    	}
     }
     
 	private class CSVFilenameFilter implements FilenameFilter {
