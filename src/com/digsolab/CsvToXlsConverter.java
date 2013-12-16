@@ -6,9 +6,18 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Scanner;
 
+import javax.swing.text.DateFormatter;
+
 import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.CreationHelper;
+import org.apache.poi.ss.usermodel.Hyperlink;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
@@ -16,12 +25,14 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 
 public class CsvToXlsConverter {
 	
+	private static final String EXCEL_EXTENSION = ".xls";
 	private ConverterOptions options = null;
     private Scanner csvScanner = null;
     private SXSSFWorkbook wb = null;
     
 	public void convertToXls(String strSource, String strDestination)
-			throws FileNotFoundException, IOException, IllegalArgumentException {
+			throws FileNotFoundException, IOException, IllegalArgumentException, ParseException,
+            NullPointerException, NumberFormatException {
 		File source = new File(strSource);
 		File destination = new File(strDestination);
 		if (!source.exists()) {
@@ -63,7 +74,8 @@ public class CsvToXlsConverter {
 	}
 	
 	
-	private void convertToXls() {
+	private void convertToXls() throws ParseException,
+    NullPointerException, NumberFormatException {
 		String input = null;
 		String[] csvCells = null;
 		wb = new SXSSFWorkbook(100);
@@ -71,26 +83,69 @@ public class CsvToXlsConverter {
 		int rowIndex = 0;
 		while (csvScanner.hasNextLine()) {
 			input = csvScanner.nextLine();
-			csvCells = input.split(",");
+			csvCells = input.split(options.getDelimeter());
 			convertToXlsRow(sh, rowIndex++, csvCells);
 		}
 		csvScanner.close();
 	}
 	
-    private void convertToXlsRow(Sheet sh, int rowIndex, String[] csvRow) {
+    private void convertToXlsRow(Sheet sh, int rowIndex, String[] csvRow) throws ParseException,
+    NullPointerException, NumberFormatException {
 		Row row = sh.createRow(rowIndex);
 		int cellTotal = csvRow.length;
 		for (int cellnum = 0; cellnum < cellTotal; cellnum++) {
 			Cell cell = row.createCell(cellnum);
-			applyFormatting(cell, csvRow[cellnum]);
+			applyFormatting(cell, csvRow[cellnum], cellnum);
 		}
 	}
 	
-    private void applyFormatting()
+    private void setCellValue(Cell cell, String data, int cellIndex) throws ParseException,
+                   NullPointerException, NumberFormatException {
+    	Format cellFormat = options.getFormats()[cellIndex];
+    	Type cellType = cellFormat.getType();
+    	switch (cellType) {
+    	case BOOLEAN:
+    		 boolean boolValue = Boolean.parseBoolean(data);
+    		 cell.setCellValue(boolValue);
+    		 break;
+    	case DATE:
+    		Date dateValue = (new SimpleDateFormat()).parse(data);
+    		cell.setCellValue(dateValue);
+    		break;
+    	case HYPERLINK:
+    		cell.setCellValue(data);
+    		Hyperlink link = wb.getCreationHelper().createHyperlink(Hyperlink.LINK_URL);
+    		link.setAddress(data);
+    		break;
+    	case NUMBER:
+    		double numValue = Double.parseDouble(data);
+    		cell.setCellValue(numValue);
+    		break;
+    	case TEXT:
+    		cell.setCellValue(data);
+    		break;
+    	default: break;
+    	}
+    }
+    
+    private void setCellStyle(Cell cell, int cellIndex) {
+    	CellStyle cellStyle = wb.createCellStyle();
+    	Format cellFormat = options.getFormats()[cellIndex];
+    	String mask = cellFormat.getMask();
+    	cellStyle.setDataFormat(
+    	        wb.getCreationHelper().createDataFormat().getFormat(mask));
+    }
+    
+    private void applyFormatting(Cell cell, String data, int cellIndex) throws ParseException,
+    NullPointerException, NumberFormatException {
+    	setCellValue(cell, data, cellIndex);
+    	setCellStyle(cell, cellIndex);
+    }
     
     private void saveXls(File file) throws FileNotFoundException, IOException {
-    	FileOutputStream fout = new FileOutputStream(file);
-    	
+    	String sourceFileName = file.getName();
+    	String destinationFileName = sourceFileName.substring(0, sourceFileName.lastIndexOf('.')) + EXCEL_EXTENSION;
+    	FileOutputStream fout = new FileOutputStream(destinationFileName);
     }
     
 	private class CSVFilenameFilter implements FilenameFilter {
