@@ -33,13 +33,13 @@ public class ConverterOptions {
 	    return options;
 	}
 	
-    private void parseConverterOptions() throws IllegalArgumentException{
+    private void parseConverterOptions() {
     	parseFilenames();
     	parseDelimeter();
     	parseFormats();
     }
     
-    private void parseFilenames() throws IllegalArgumentException {
+    private void parseFilenames() {
     	String[] args = line.getArgs();
     	if (args.length > 0) {
     		this.source = args[0];
@@ -59,7 +59,7 @@ public class ConverterOptions {
 		}
 	}
 	
-	private void parseFormats() throws IllegalArgumentException {
+	private void parseFormats()  {
 		String columnsParamsString = line.getOptionValue(COLUMNS_KEY);
 		if (columnsParamsString == null) {
 			throw new IllegalArgumentException("You haven't provided the columns pattern string");
@@ -102,7 +102,7 @@ public class ConverterOptions {
 		return format;
 	}
 	
-	public void parseOptions(String[] args) throws ParseException, IllegalArgumentException {
+	public void parseOptions(String[] args) throws ParseException {
 		getCLIArgs(args);
 		parseConverterOptions();
 	}
