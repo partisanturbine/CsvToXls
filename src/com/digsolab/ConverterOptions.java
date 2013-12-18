@@ -69,7 +69,7 @@ public class ConverterOptions {
 		String currentFormat = null;
 		for (int i = 0; i < columnParams.length; i++) {
 			currentFormat = columnParams[i];
-			String[] values = currentFormat.split(" ");
+			String[] values = currentFormat.split(" ", 1);
 			Format format = createFormat(values);
 			if (format == null) {
 				throw new IllegalArgumentException("The columns pattern string is invalid format");
